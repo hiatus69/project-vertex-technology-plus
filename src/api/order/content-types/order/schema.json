@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "Order"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Status_order": {
+      "type": "enumeration",
+      "required": true,
+      "default": "Waiting in queue",
+      "enum": [
+        "Waiting in queue",
+        "Accepting order",
+        "Installing",
+        "Completed",
+        "Cancel"
+      ]
+    },
+    "customerNotes": {
+      "type": "text",
+      "unique": false
+    },
+    "bookingDate": {
+      "type": "datetime"
+    },
+    "completionProof": {
+      "type": "component",
+      "component": "shared.completion-proof",
+      "repeatable": false
+    },
+    "customer": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "employee": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "order_items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order-item.order-item",
+      "mappedBy": "order"
+    },
+    "totalPrice": {
+      "type": "decimal"
+    },
+    "adjustments": {
+      "type": "decimal"
+    }
+  }
+}
