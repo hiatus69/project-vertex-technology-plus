@@ -13,8 +13,7 @@
   "attributes": {
     "Status_order": {
       "type": "enumeration",
-      "required": true,
-      "default": "Waiting in queue",
+      "required": false,
       "enum": [
         "Waiting in queue",
         "Accepting order",
@@ -27,6 +26,15 @@
       "type": "text",
       "unique": false
     },
+    "contactName": {
+      "type": "string"
+    },
+    "installationAddress": {
+      "type": "text"
+    },
+    "contactPhone": {
+      "type": "string"
+    },
     "bookingDate": {
       "type": "datetime"
     },
@@ -37,13 +45,9 @@
     },
     "customer": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::users-permissions.user"
-    },
-    "employee": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::users-permissions.user"
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "orders"
     },
     "order_items": {
       "type": "relation",
@@ -51,11 +55,11 @@
       "target": "api::order-item.order-item",
       "mappedBy": "order"
     },
-    "totalPrice": {
-      "type": "decimal"
-    },
-    "adjustments": {
-      "type": "decimal"
+    "employee": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "assigned_orders"
     }
   }
 }
