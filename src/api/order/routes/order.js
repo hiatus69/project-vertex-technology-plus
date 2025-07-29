@@ -1,9 +1,4 @@
 'use strict';
-
-/**
- * order router
- */
-
 const { createCoreRouter } = require('@strapi/strapi').factories;
 
 // เราจะ "ขยาย" router ที่มีอยู่เดิม
@@ -26,7 +21,7 @@ const myExtraRoutes = [
   {
     method: 'GET',
     path: '/orders/me',
-    handler: 'order.me', // <-- เปลี่ยน handler ให้ชี้ไปที่ controller 'order' และ action 'me'
+    handler: 'order.me', // <-- ชี้ไปที่ controller 'order' และ action 'me'
   },
 ];
 
