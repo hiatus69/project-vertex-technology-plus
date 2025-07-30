@@ -20,17 +20,18 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
     const { orderItemData, contactInfo } = ctx.request.body.data;
 
     try {
-      // 1. สร้าง Order Item (Snapshot) ก่อน
+      // ขั้นตอนที่ 1: สร้าง Order Item (Snapshot) ก่อน
       const newOrderItem = await strapi.entityService.create('api::order-item.order-item', {
         data: {
           packageName: orderItemData.packageName,
           price: orderItemData.price,
           features: orderItemData.features,
-          publishedAt: new Date(), // ตั้งค่าให้ publish ทันที
+          employeeNotes: contactInfo.customerNotes,
+          publishedAt: new Date(),
         }
       });
 
-      // 2. สร้าง Order หลัก และ "เชื่อมต่อ" ความสัมพันธ์ทั้งหมดที่หลังบ้าน
+      // ขั้นตอนที่ 2: สร้าง Order หลัก โดยใส่แค่ข้อมูลธรรมดาก่อน
       const newOrder = await strapi.entityService.create('api::order.order', {
         data: {
           Status_order: 'Waiting_in_queue',
@@ -38,16 +39,25 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
           contactName: contactInfo.contactName,
           installationAddress: contactInfo.installationAddress,
           contactPhone: contactInfo.contactPhone,
-          customer: user.id, // เชื่อมกับลูกค้าที่ล็อกอินอยู่
-          order_items: [newOrderItem.id], // เชื่อมกับ Order Item ที่เพิ่งสร้าง
           publishedAt: new Date(),
         }
       });
+      
+      // ขั้นตอนที่ 3: "อัปเดต" Order ที่เพิ่งสร้าง เพื่อ "เชื่อม" ความสัมพันธ์
+      const updatedOrder = await strapi.entityService.update('api::order.order', newOrder.id, {
+        data: {
+          customer: user.id,              // เชื่อมกับลูกค้าที่ล็อกอินอยู่
+          order_items: [newOrderItem.id], // เชื่อมกับ Order Item ที่เพิ่งสร้าง
+        },
+        populate: { order_items: true, customer: true } // สั่งให้ดึงข้อมูลที่เชื่อมแล้วกลับมาด้วย
+      });
 
-      return this.transformResponse(newOrder);
+      return this.transformResponse(updatedOrder);
 
     } catch (err) {
-      ctx.body = err;
+      // ถ้าเกิดข้อผิดพลาด ให้ส่ง Error กลับไป
+      console.error("Error in custom order create controller:", err);
+      return ctx.badRequest('An error occurred while creating the order.', { details: err.message });
     }
   },
 
