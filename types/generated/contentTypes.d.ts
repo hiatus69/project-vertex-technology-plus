@@ -597,7 +597,7 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
       'api::order-item.order-item'
     > &
       Schema.Attribute.Private;
-    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    order: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
     packageName: Schema.Attribute.String;
     price: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
@@ -641,8 +641,8 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
-    order_items: Schema.Attribute.Relation<
-      'oneToMany',
+    order_item: Schema.Attribute.Relation<
+      'oneToOne',
       'api::order-item.order-item'
     >;
     publishedAt: Schema.Attribute.DateTime;
