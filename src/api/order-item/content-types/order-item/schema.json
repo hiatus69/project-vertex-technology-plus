@@ -22,9 +22,9 @@
     },
     "order": {
       "type": "relation",
-      "relation": "manyToOne",
+      "relation": "oneToOne",
       "target": "api::order.order",
-      "inversedBy": "order_items"
+      "mappedBy": "order_item"
     },
     "employeeNotes": {
       "type": "text"
