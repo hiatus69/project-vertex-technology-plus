@@ -1,68 +1,55 @@
+// File: src/api/order/controllers/order.js
 'use strict';
-
-/**
- * order controller
- */
-
 const { createCoreController } = require('@strapi/strapi').factories;
 
 module.exports = createCoreController('api::order.order', ({ strapi }) => ({
-
-  // --- 1. เขียนทับฟังก์ชัน "create" (สร้างออเดอร์) ทั้งหมด ---
+  // ฟังก์ชัน create ที่เราทำไว้
   async create(ctx) {
-    const user = ctx.state.user; // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
-
-    if (!user) {
-      return ctx.unauthorized('You must be logged in.');
-    }
-
-    // ดึงข้อมูลดิบที่หน้าบ้านส่งมา
+    const user = ctx.state.user;
+    if (!user) { return ctx.unauthorized('You must be logged in.'); }
     const { orderItemData, contactInfo } = ctx.request.body.data;
-
     try {
-      // ขั้นตอนที่ 1: สร้าง Order Item (Snapshot) ก่อน
-      const newOrderItem = await strapi.entityService.create('api::order-item.order-item', {
+      const newOrder = await strapi.entityService.create('api::order.order', {
+        data: {
+          Status_order: 'Waiting in queue',
+          customerNotes: contactInfo.customerNotes,
+          contactName: contactInfo.contactName,
+          installationAddress: contactInfo.installationAddress,
+          contactPhone: contactInfo.contactPhone,
+          publishedAt: new Date(),
+          customer: user.id,
+        }
+      });
+      await strapi.entityService.create('api::order-item.order-item', {
         data: {
           packageName: orderItemData.packageName,
           price: orderItemData.price,
           features: orderItemData.features,
           employeeNotes: contactInfo.customerNotes,
           publishedAt: new Date(),
+          order: newOrder.id,
         }
       });
-
-      // ขั้นตอนที่ 2: สร้าง Order หลัก โดยใส่แค่ข้อมูลธรรมดาก่อน
-      const newOrder = await strapi.entityService.create('api::order.order', {
-        data: {
-          Status_order: 'Waiting_in_queue',
-          customerNotes: contactInfo.customerNotes,
-          contactName: contactInfo.contactName,
-          installationAddress: contactInfo.installationAddress,
-          contactPhone: contactInfo.contactPhone,
-          publishedAt: new Date(),
-        }
+      const finalOrder = await strapi.entityService.findOne('api::order.order', newOrder.id, {
+          populate: { order_item: true, customer: true }
       });
-      
-      // ขั้นตอนที่ 3: "อัปเดต" Order ที่เพิ่งสร้าง เพื่อ "เชื่อม" ความสัมพันธ์
-      const updatedOrder = await strapi.entityService.update('api::order.order', newOrder.id, {
-        data: {
-          customer: user.id,              // เชื่อมกับลูกค้าที่ล็อกอินอยู่
-          order_items: [newOrderItem.id], // เชื่อมกับ Order Item ที่เพิ่งสร้าง
-        },
-        populate: { order_items: true, customer: true } // สั่งให้ดึงข้อมูลที่เชื่อมแล้วกลับมาด้วย
-      });
-
-      return this.transformResponse(updatedOrder);
-
+      return this.transformResponse(finalOrder);
     } catch (err) {
-      // ถ้าเกิดข้อผิดพลาด ให้ส่ง Error กลับไป
-      console.error("Error in custom order create controller:", err);
+      console.error("--- FATAL ERROR in create controller ---", err);
       return ctx.badRequest('An error occurred while creating the order.', { details: err.message });
     }
   },
 
-  // --- 2. ฟังก์ชัน "me" สำหรับดูออเดอร์ของตัวเอง (ของเดิม) ---
+  // ฟังก์ชัน me ที่เราต้องการ
   async me(ctx) {
-    // ... โค้ดส่วนนี้เหมือนเดิม ...
+    const user = ctx.state.user;
+    if (!user) { return ctx.unauthorized('You must be logged in.'); }
+    
+    const orders = await strapi.entityService.findMany('api::order.order', {
+        filters: { customer: { id: user.id } },
+        sort: { createdAt: 'desc' },
+        populate: { order_item: true }
+    });
+    return this.transformResponse(orders);
   },
 }));
