@@ -43,12 +43,6 @@
       "component": "shared.completion-proof",
       "repeatable": false
     },
-    "order_item": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::order-item.order-item",
-      "inversedBy": "order"
-    },
     "customer": {
       "type": "relation",
       "relation": "manyToOne",
@@ -60,6 +54,12 @@
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "assigned_orders"
+    },
+    "order_item": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order-item.order-item",
+      "inversedBy": "order"
     }
   }
 }
