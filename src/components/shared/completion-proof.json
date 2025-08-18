@@ -4,21 +4,6 @@
     "displayName": "completionProof "
   },
   "options": {},
-  "attributes": {
-    "proofImage": {
-      "type": "media",
-      "multiple": true,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
-    },
-    "completedBy": {
-      "type": "string",
-      "required": false
-    }
-  },
+  "attributes": {},
   "config": {}
 }
