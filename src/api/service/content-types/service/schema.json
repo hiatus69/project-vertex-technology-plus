@@ -26,13 +26,23 @@
     "serviceImage": {
       "type": "media",
       "multiple": false,
-      "required": true,
+      "required": false,
       "allowedTypes": [
         "images"
       ]
     },
     "displayOrder": {
       "type": "integer"
+    },
+    "isPromotion": {
+      "type": "boolean",
+      "default": false
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "service"
     }
   }
 }
