@@ -5,13 +5,7 @@ export interface SharedCompletionProof extends Struct.ComponentSchema {
   info: {
     displayName: 'completionProof ';
   };
-  attributes: {
-    completedBy: Schema.Attribute.String;
-    proofImage: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios',
-      true
-    >;
-  };
+  attributes: {};
 }
 
 export interface SharedMedia extends Struct.ComponentSchema {
