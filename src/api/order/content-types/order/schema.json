@@ -11,17 +11,6 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "Status_order": {
-      "type": "enumeration",
-      "required": false,
-      "enum": [
-        "Waiting in queue",
-        "Accepting order",
-        "Installing",
-        "Completed",
-        "Cancel"
-      ]
-    },
     "customerNotes": {
       "type": "text",
       "unique": false
@@ -35,31 +24,18 @@
     "contactPhone": {
       "type": "string"
     },
-    "bookingDate": {
-      "type": "datetime"
+    "citizenId": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
     },
-    "completionProof": {
-      "type": "component",
-      "component": "shared.completion-proof",
-      "repeatable": false
-    },
-    "customer": {
+    "service": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
+      "target": "api::service.service",
       "inversedBy": "orders"
-    },
-    "employee": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "assigned_orders"
-    },
-    "order_item": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::order-item.order-item",
-      "inversedBy": "order"
     }
   }
 }
