@@ -1,55 +1,28 @@
-// File: src/api/order/controllers/order.js
 'use strict';
 const { createCoreController } = require('@strapi/strapi').factories;
 
 module.exports = createCoreController('api::order.order', ({ strapi }) => ({
-  // ฟังก์ชัน create ที่เราทำไว้
   async create(ctx) {
-    const user = ctx.state.user;
-    if (!user) { return ctx.unauthorized('You must be logged in.'); }
-    const { orderItemData, contactInfo } = ctx.request.body.data;
-    try {
-      const newOrder = await strapi.entityService.create('api::order.order', {
-        data: {
-          Status_order: 'Waiting in queue',
-          customerNotes: contactInfo.customerNotes,
-          contactName: contactInfo.contactName,
-          installationAddress: contactInfo.installationAddress,
-          contactPhone: contactInfo.contactPhone,
-          publishedAt: new Date(),
-          customer: user.id,
-        }
-      });
-      await strapi.entityService.create('api::order-item.order-item', {
-        data: {
-          packageName: orderItemData.packageName,
-          price: orderItemData.price,
-          features: orderItemData.features,
-          employeeNotes: contactInfo.customerNotes,
-          publishedAt: new Date(),
-          order: newOrder.id,
-        }
-      });
-      const finalOrder = await strapi.entityService.findOne('api::order.order', newOrder.id, {
-          populate: { order_item: true, customer: true }
-      });
-      return this.transformResponse(finalOrder);
-    } catch (err) {
-      console.error("--- FATAL ERROR in create controller ---", err);
-      return ctx.badRequest('An error occurred while creating the order.', { details: err.message });
-    }
-  },
+    // 1. ดึงข้อมูลดิบที่ถูกส่งมาแบบ FormData
+    const { data, files } = ctx.request.body;
 
-  // ฟังก์ชัน me ที่เราต้องการ
-  async me(ctx) {
-    const user = ctx.state.user;
-    if (!user) { return ctx.unauthorized('You must be logged in.'); }
-    
-    const orders = await strapi.entityService.findMany('api::order.order', {
-        filters: { customer: { id: user.id } },
-        sort: { createdAt: 'desc' },
-        populate: { order_item: true }
-    });
-    return this.transformResponse(orders);
+    // 2. ตรวจสอบและแปลงข้อมูล JSON string
+    let parsedData;
+    try {
+      // ถ้าไม่มี data ส่งมา ให้ใช้ object ว่างๆ แทน
+      parsedData = data ? JSON.parse(data) : {};
+    } catch (e) {
+      return ctx.badRequest('Invalid JSON data format.');
+    }
+
+    // 3. กำหนดค่าเริ่มต้นที่สำคัญที่ฝั่ง Backend เท่านั้น
+    parsedData.publishedAt = new Date(); // สั่งให้ "เผยแพร่" ทันที
+
+    // 4. ประกอบร่างข้อมูลกลับเข้าไปใน context
+    ctx.request.body = { data: parsedData, files };
+
+    // 5. เรียกใช้ฟังก์ชัน create ดั้งเดิมของ Strapi เพื่อบันทึกทุกอย่าง
+    const response = await super.create(ctx);
+    return response;
   },
 }));
