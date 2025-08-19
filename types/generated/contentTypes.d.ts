@@ -583,7 +583,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     singularName: 'order';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     citizenId: Schema.Attribute.Media<'images'>;
@@ -613,7 +613,7 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     singularName: 'service';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
